@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+    balancer:
+      build: .
+      ports:
+      - 80:80
+      restart: always
+      links:
+      - tst-proxy
+      - tst1-proxy
+      - tst2
+    tst-proxy:
+      build: ../tst.loc/nginx
+      volumes:
+        - ../tst.loc/www:/var/www
+      restart: always
+      links:
+        - tst-php
+    tst-php:
+      build: ../tst.loc/php
+      volumes:
+        - ../tst.loc/www:/var/www
+        - ../tst.loc/logs/nginx/:/var/log/nginx
+      restart: always
+    tst1-proxy:
+      build: ../tst1.loc/nginx
+      volumes:
+        - ../tst1.loc/www:/var/www
+      restart: always
+      links:
+        - tst1-php
+    tst1-php:
+      build: ../tst1.loc/php
+      volumes:
+        - ../tst1.loc/www:/var/www
+        - ../tst1.loc/logs/nginx/:/var/log/nginx
+      restart: always
+    tst2:
+      build: ../tst2.loc/
+      restart: always
