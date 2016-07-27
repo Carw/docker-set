@@ -1,0 +1,66 @@
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./logs/nginx/:/var/log/nginx
+
+  mysql:
+    build: ./mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: xdMQcEXmfgJiznCeXm83
+
+  php-app:
+    build: ./php5.6
+
+  tst.loc:
+    image: ready_php-app
+    environment:
+      - VIRTUAL_HOST=tst.loc
+    expose:
+      - 80
+    links:
+      - mysql
+    depends_on:
+      - php-app
+    volumes:
+      - ./site/tst.loc/www:/var/www/html/
+      - ./site/tst.loc/config/apache-config.conf:/etc/apache2/sites-enabled/000-default.conf
+  tst1.loc:
+    image: ready_php-app
+    environment:
+      - VIRTUAL_HOST=tst1.loc
+    expose:
+      - 80
+    links:
+      - mysql
+    depends_on:
+      - php-app
+    volumes:
+      - ./site/tst1.loc/www:/var/www/html/
+
+  tst2.loc:
+      image: ready_php-app
+      environment:
+        - VIRTUAL_HOST=tst2.loc
+      expose:
+        - 80
+      links:
+        - mysql
+      depends_on:
+        - php-app
+      volumes:
+        - ./site/tst2.loc/www:/var/www/html/
+
+# docker build -t my-php-app .
+# docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy
+# docker run -d -e VIRTUAL_HOST=tst.loc --name my-running-app1 my-php-app
